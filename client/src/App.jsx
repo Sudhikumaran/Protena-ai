@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import { UserButton, useUser } from '@clerk/clerk-react'
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import Nutrition from './pages/Nutrition'
@@ -7,6 +8,7 @@ import Plans from './pages/Plans'
 import Streaks from './pages/Streaks'
 import './App.css'
 import { useAthleteData } from './context/AthleteDataContext'
+import OnboardingWizard from './components/OnboardingWizard'
 
 function SidebarContent({ navLinks, overviewStats, onNavigate }) {
   return (
@@ -51,8 +53,11 @@ function App() {
   const [highContrast, setHighContrast] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const { overviewStats, user } = useAthleteData()
+  const { overviewStats, user, needsOnboarding, loading } = useAthleteData()
   const location = useLocation()
+  const { user: clerkUser } = useUser()
+  const displayName = user?.name || clerkUser?.fullName || clerkUser?.firstName || 'Athlete'
+  const focusLabel = user?.focus || clerkUser?.primaryEmailAddress?.emailAddress || 'Hybrid engine'
   
   const navLinks = [
     { path: '/', label: 'Home' },
@@ -78,6 +83,18 @@ function App() {
     setIsSidebarOpen(false)
   }, [location.pathname])
 
+  if (needsOnboarding) {
+    return <OnboardingWizard />
+  }
+
+  if (loading && !overviewStats.length) {
+    return (
+      <div className="page loading-state">
+        <p className="muted">Syncing your data stream…</p>
+      </div>
+    )
+  }
+
   return (
     <div
       className="app-shell"
@@ -96,7 +113,7 @@ function App() {
         <header className="app-header">
           <div>
             <p className="eyebrow">Welcome back</p>
-            <h2>{user.name}</h2>
+            <h2>{displayName}</h2>
           </div>
           <div className="header-actions">
             <button
@@ -108,7 +125,7 @@ function App() {
             >
               Menu
             </button>
-            <span className="pill pill-outline">{user.focus}</span>
+            <span className="pill pill-outline">{focusLabel}</span>
             <button className="primary-btn">Sync devices</button>
             <div className="toggle-group">
               <button
@@ -129,6 +146,7 @@ function App() {
               </button>
             </div>
           </div>
+          <UserButton afterSignOutUrl="/" />
         </header>
 
         <main className="app-content">

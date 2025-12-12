@@ -17,9 +17,16 @@ npm install
 npm run dev
 ```
 
-- `npm run dev` – start Vite dev server with React Fast Refresh.
-- `npm run build` – production build (used to verify commits).
-- `npm run preview` – serve the build locally for QA sessions.
+### Environment variables
+
+Create a `.env` file in `client/` (Vite format) with:
+
+```
+VITE_API_BASE_URL=http://localhost:4000
+VITE_CLERK_PUBLISHABLE_KEY=<clerk_publishable_key>
+```
+
+`VITE_CLERK_PUBLISHABLE_KEY` is required for Clerk auth and every data request automatically scopes to the signed-in athlete, so no static IDs are needed.
 
 ## Project Structure
 

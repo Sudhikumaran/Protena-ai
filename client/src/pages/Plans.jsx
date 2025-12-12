@@ -1,15 +1,11 @@
+import { useState } from 'react'
 import { useAthleteData } from '../context/AthleteDataContext'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 
-const splitCalendar = [
-  { day: 'Mon', focus: 'Lower Strength', note: 'RDL clusters + sled push', source: 'AI tuned' },
-  { day: 'Tue', focus: 'Chest + Tris', note: 'Tempo incline · cable finishers', source: 'Today' },
-  { day: 'Wed', focus: 'Engine Intervals', note: '5 x 6 min @ 80% HR', source: 'AI tuned' },
-  { day: 'Thu', focus: 'Back + Bis', note: 'Density pull session', source: 'Custom' },
-  { day: 'Fri', focus: 'Hybrid Brick', note: '3k run · KB complex', source: 'AI tuned' },
-  { day: 'Sat', focus: 'Glutes + Core', note: 'Split squats · anti-rotation', source: 'AI tuned' },
-  { day: 'Sun', focus: 'Reset + Mobility', note: 'Guided fascia flow', source: 'Custom' },
-]
+const getPlanDay = (plan) => {
+  const [dayLabel] = plan.name.split('·')
+  return dayLabel?.trim() || plan.name
+}
 
 const aiWorkoutsToday = [
   {
@@ -35,13 +31,32 @@ const todaySessionInsights = {
 }
 
 function Plans() {
-  const { user, goalPrescription, planTracks, quickActions } = useAthleteData()
+  const {
+    user,
+    goalPrescription,
+    planTracks,
+    quickActions,
+    generatePlan,
+    planGenerationLoading,
+    planGenerationError,
+    planSummary,
+  } = useAthleteData()
+  const [planPrompt, setPlanPrompt] = useState('Push/pull/legs with 2 cardio days · minimal equipment')
+  const [trainingDays, setTrainingDays] = useState('6')
   const headerRef = useScrollReveal()
   const splitRef = useScrollReveal()
   const aiRef = useScrollReveal()
   const intakeRef = useScrollReveal()
   const plansRef = useScrollReveal()
   const actionsRef = useScrollReveal()
+  const handleGeneratePlan = async (event) => {
+    event.preventDefault()
+    try {
+      await generatePlan({ prompt: planPrompt, trainingDays })
+    } catch (error) {
+      // surfaced via context
+    }
+  }
 
   return (
     <div className="page plans-page">
@@ -108,7 +123,7 @@ function Plans() {
           </article>
           <article>
             <p className="eyebrow">Habits flagged</p>
-            <p>{user.badHabits.join(', ')}</p>
+            <p>{Array.isArray(user.badHabits) && user.badHabits.length ? user.badHabits.join(', ') : 'None logged'}</p>
           </article>
         </div>
         <div className="profile-prescriptions">
@@ -138,25 +153,46 @@ function Plans() {
             <p className="eyebrow">This week</p>
             <h2>Workout split calendar</h2>
           </div>
-          <div className="split-actions">
-            <button className="ghost-btn">Edit split</button>
-            <button className="primary-btn">Generate via AI</button>
-          </div>
-        </header>
-        <div className="split-calendar">
-          {splitCalendar.map((day) => (
-            <article
-              key={day.day}
-              className={`split-day ${day.source === 'Today' ? 'split-day-active' : ''}`}
+          <form className="split-actions" onSubmit={handleGeneratePlan}>
+            <label className="sr-only" htmlFor="planPrompt">Prompt</label>
+            <input
+              id="planPrompt"
+              type="text"
+              value={planPrompt}
+              onChange={(event) => setPlanPrompt(event.target.value)}
+              placeholder="e.g., Push/pull/legs with 2 cardio days"
+            />
+            <label className="sr-only" htmlFor="trainingDays">Days</label>
+            <select
+              id="trainingDays"
+              value={trainingDays}
+              onChange={(event) => setTrainingDays(event.target.value)}
             >
-              <p className="split-day-label">{day.day}</p>
-              <h3>{day.focus}</h3>
-              <p className="muted">{day.note}</p>
-              <span className={`pill ${day.source === 'Custom' ? 'pill-outline' : ''}`}>
-                {day.source === 'Today' ? 'Today · AI' : day.source}
-              </span>
+              {[3, 4, 5, 6, 7].map((day) => (
+                <option key={day} value={day}>
+                  {day} days
+                </option>
+              ))}
+            </select>
+            <button type="submit" className="primary-btn" disabled={planGenerationLoading}>
+              {planGenerationLoading ? 'Generating…' : 'Generate via AI'}
+            </button>
+          </form>
+        </header>
+        {planGenerationError && <p className="error-banner">{planGenerationError}</p>}
+        {planSummary?.summary && (
+          <p className="muted">{planSummary.summary}</p>
+        )}
+        <div className="split-calendar">
+          {planTracks.map((plan, index) => (
+            <article key={plan.name} className={`split-day ${index === 0 ? 'split-day-active' : ''}`}>
+              <p className="split-day-label">{getPlanDay(plan)}</p>
+              <h3>{plan.focus}</h3>
+              <p className="muted">{plan.detail}</p>
+              <span className="pill">AI curated</span>
             </article>
           ))}
+          {planTracks.length === 0 && <p className="muted">No plan yet. Generate one above.</p>}
         </div>
       </section>
 
