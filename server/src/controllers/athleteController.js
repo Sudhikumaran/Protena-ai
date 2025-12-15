@@ -304,6 +304,7 @@ export async function upsertCurrentAthlete(req, res, next) {
     }
 
     const emailFromRequest = extractEmailFromRequest(req)
+    const validatedData = req.validatedBody || req.body
     const {
       name,
       weight,
@@ -313,13 +314,8 @@ export async function upsertCurrentAthlete(req, res, next) {
       dietPreference,
       trainingFrequency,
       badHabits,
-    } = req.body || {}
+    } = validatedData
 
-    if (!name || !weight || !goal) {
-      return res.status(400).json({ message: 'Name, weight, and goal are required' })
-    }
-
-    let athlete = await Athlete.findOne({ clerkUserId })
     const personalizationPayload = {
       name,
       email: emailFromRequest,
@@ -331,6 +327,8 @@ export async function upsertCurrentAthlete(req, res, next) {
       trainingFrequency,
       badHabits,
     }
+
+    let athlete = await Athlete.findOne({ clerkUserId })
 
     if (athlete) {
       applyPersonalization(athlete, personalizationPayload, { persistDietPreference: true })

@@ -38,11 +38,14 @@ function OnboardingWizard() {
   const [localError, setLocalError] = useState(null)
 
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      name: prev.name || defaultName,
-      email: prev.email || defaultEmail,
-    }))
+    if (defaultName || defaultEmail) {
+      setFormData((prev) => {
+        const updates = {}
+        if (!prev.name && defaultName) updates.name = defaultName
+        if (!prev.email && defaultEmail) updates.email = defaultEmail
+        return Object.keys(updates).length ? { ...prev, ...updates } : prev
+      })
+    }
   }, [defaultEmail, defaultName])
 
   const isSubmitDisabled = useMemo(() => {

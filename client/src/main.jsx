@@ -5,6 +5,7 @@ import { ClerkProvider, RedirectToSignIn, SignedIn, SignedOut } from '@clerk/cle
 import './index.css'
 import App from './App.jsx'
 import { AthleteDataProvider } from './context/AthleteDataContext.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 
 const CLERK_PUBLISHABLE_KEY =
   import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || import.meta.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
@@ -15,17 +16,19 @@ if (!CLERK_PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <BrowserRouter>
-        <SignedIn>
-          <AthleteDataProvider>
-            <App />
-          </AthleteDataProvider>
-        </SignedIn>
-        <SignedOut>
-          <RedirectToSignIn />
-        </SignedOut>
-      </BrowserRouter>
-    </ClerkProvider>
+    <ErrorBoundary>
+      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
+        <BrowserRouter>
+          <SignedIn>
+            <AthleteDataProvider>
+              <App />
+            </AthleteDataProvider>
+          </SignedIn>
+          <SignedOut>
+            <RedirectToSignIn />
+          </SignedOut>
+        </BrowserRouter>
+      </ClerkProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

@@ -17,21 +17,6 @@ const featureHighlights = [
   },
 ]
 
-const workflowSteps = [
-  {
-    title: 'Sense',
-    detail: 'Camera scan + wearable signal detect what you ate, how you slept, and strain trends.',
-  },
-  {
-    title: 'Score',
-    detail: 'Macros, readiness, and adherence scored hourly to predict dips before they happen.',
-  },
-  {
-    title: 'Steer',
-    detail: 'Micro coaching nudges adjust protein goals, workouts, and streak multipliers in-app.',
-  },
-]
-
 const athleteTypes = [
   { title: 'Strength Builder', body: 'Push / Pull / Legs with auto deload detection.' },
   { title: 'Hybrid Engine', body: 'Balance long runs with heavy lifts via AI fueling windows.' },
@@ -59,20 +44,6 @@ const runwayPillars = [
   { label: '03', title: 'Streak Energy', detail: 'Micro goals stack so hitting today powers tomorrow’s momentum.' },
 ]
 
-const ritualMoments = [
-  {
-    title: 'Morning Sync',
-    summary: 'Overnight recovery report whispers how hard to push strength blocks.',
-  },
-  {
-    title: 'Midday Scan',
-    summary: 'Camera-powered macros rebalance protein gaps before the next session.',
-  },
-  {
-    title: 'Evening Lock',
-    summary: 'Habit score, streak multipliers, and next-day cues drop into one card.',
-  },
-]
 
 const heroMedia = {
   hero:
@@ -87,8 +58,6 @@ function Home() {
   const { statHighlights, heroBadges, overviewStats } = useAthleteData()
   const heroRevealRef = useScrollReveal()
   const featuresRef = useScrollReveal()
-  const statsRef = useScrollReveal()
-  const workflowRef = useScrollReveal()
   const mediaRef = useScrollReveal()
   const testimonialRef = useScrollReveal()
   const heroTilt = useParallaxTilt(12)

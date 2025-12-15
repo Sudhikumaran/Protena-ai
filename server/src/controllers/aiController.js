@@ -237,10 +237,8 @@ export async function getMealSuggestion(req, res, next) {
       return res.status(401).json({ message: 'Missing authenticated user' })
     }
 
-    const { query, mealType } = req.body || {}
-    if (!query || !query.trim()) {
-      return res.status(400).json({ message: 'Meal name or description is required' })
-    }
+    const validatedData = req.validatedBody || req.body
+    const { query, mealType } = validatedData
 
     const athlete = await Athlete.findOne({ clerkUserId })
     if (!athlete) {
@@ -325,7 +323,8 @@ export async function generatePlan(req, res, next) {
       return res.status(401).json({ message: 'Missing authenticated user' })
     }
 
-    const { prompt = '', trainingDays } = req.body || {}
+    const validatedData = req.validatedBody || req.body
+    const { prompt = '', trainingDays } = validatedData
     const athlete = await Athlete.findOne({ clerkUserId })
     if (!athlete) {
       return res.status(404).json({ message: 'Athlete not found' })

@@ -53,8 +53,8 @@ function Plans() {
     event.preventDefault()
     try {
       await generatePlan({ prompt: planPrompt, trainingDays })
-    } catch (error) {
-      // surfaced via context
+    } catch {
+      // error surfaced via context state
     }
   }
 
